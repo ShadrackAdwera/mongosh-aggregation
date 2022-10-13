@@ -92,6 +92,8 @@ db.persons
 COMBINE PROJECTIONS 
 1. Transform location data to GeoJSON and convert it to a number
 2. Project the data alongside other fields passed from projection 1
+3. Group people based on the year they were born and show the count
+4. Sort in descending order
 */
 
 db.persons
@@ -165,5 +167,12 @@ db.persons
         location: 1,
       },
     },
+    {
+      $group: {
+        _id: { yearofbirth: { $isoWeekYear: '$dateofbirth' } },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { count: -1 } },
   ])
   .pretty();
