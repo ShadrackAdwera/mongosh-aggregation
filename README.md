@@ -1,3 +1,3 @@
 # Mongodb Aggregation Framework
 
-- A repo to store commands on the sample data set provided - a combination of different queries based on the mongodb's aggregation pipeline.
+- A repo for [aggregation pipeline operators](https://www.mongodb.com/docs/manual/reference/operator/aggregation/) on the sample data set provided - a combination of different operators based on the [mongodb's aggregation pipeline](https://www.mongodb.com/docs/manual/reference/operator/aggregation/).
