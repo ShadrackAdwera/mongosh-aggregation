@@ -176,3 +176,19 @@ db.persons
     { $sort: { count: -1 } },
   ])
   .pretty();
+
+/*
+  1. Buckets to have a feel on data distribution
+  */
+db.persons.aggregate([
+  {
+    $bucket: {
+      groupBy: '$dob.age',
+      boundaries: [0, 18, 30, 50, 80, 120],
+      output: {
+        persons: { $sum: 1 },
+        averageage: { $avg: '$dob.age' },
+      },
+    },
+  },
+]);
