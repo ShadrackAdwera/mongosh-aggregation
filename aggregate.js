@@ -178,6 +178,90 @@ db.persons
   .pretty();
 
 /*
+COMBINE PROJECTIONS 
+1. Transform location data to GeoJSON and convert it to a number
+2. Project the data alongside other fields passed from projection 1
+3. Sort in descending order
+4. Write the data into a collection called transformedPersons
+*/
+
+db.persons
+  .aggregate([
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        email: 1,
+        dob: 1,
+        location: {
+          type: 'Point',
+          coordinates: [
+            {
+              $convert: {
+                input: '$location.coordinates.longitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0,
+              },
+            },
+            {
+              $convert: {
+                input: '$location.coordinates.latitude',
+                to: 'double',
+                onError: 0.0,
+                onNull: 0.0,
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        fullname: {
+          $concat: [
+            { $toUpper: { $substrCP: ['$name.title', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.title',
+                1,
+                { $subtract: [{ $strLenCP: '$name.title' }, 1] },
+              ],
+            },
+            ' ',
+            { $toUpper: { $substrCP: ['$name.first', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.first',
+                1,
+                { $subtract: [{ $strLenCP: '$name.first' }, 1] },
+              ],
+            },
+            ' ',
+            { $toUpper: { $substrCP: ['$name.last', 0, 1] } },
+            {
+              $substrCP: [
+                '$name.last',
+                1,
+                { $subtract: [{ $strLenCP: '$name.last' }, 1] },
+              ],
+            },
+          ],
+        },
+        email: 1,
+        gender: 1,
+        dateofbirth: { $toDate: '$dob.date' },
+        age: '$dob.age',
+        location: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+    { $out: 'transformedPersons' },
+  ])
+  .pretty();
+
+/*
   1. Buckets to have a feel on data distribution
   */
 db.persons.aggregate([
@@ -210,3 +294,16 @@ db.persons
     },
   ])
   .pretty();
+
+db.persons.aggregate([
+  {
+    $project: {
+      _id: 1,
+      name: { $concat: ['$name.first', ' ', '$name.last'] },
+      dateofbirth: { $toDate: '$dob.date' },
+    },
+  },
+  { $sort: { dateofbirth: 1 } },
+  { $skip: 10 },
+  { $limit: 10 },
+]);
