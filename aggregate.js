@@ -193,6 +193,7 @@ db.persons
         name: 1,
         email: 1,
         dob: 1,
+        gender: 1,
         location: {
           type: 'Point',
           coordinates: [
@@ -305,5 +306,28 @@ db.persons.aggregate([
   },
   { $sort: { dateofbirth: 1 } },
   { $skip: 10 },
+  { $limit: 10 },
+]);
+
+/*
+1. For geo location data created, in the transformedPersons pipeline, create a 2dsphere index on location document.
+2. $geoNear finds elements in the collection near the current position
+3. In order to use geoNear, it has to be the first element in the pipeline
+4. Find the first 10 females closest to the location provided, max distance 10km - age > 23 and less than 32
+*/
+db.transformedPersons.createIndex({ location: '2dsphere' });
+
+db.transformedPersons.aggregate([
+  {
+    $geoNear: {
+      near: {
+        type: 'Point',
+        coordinates: [-18.4, -42.8],
+      },
+      maxDistance: 10000,
+      query: { gender: 'female', age: { $lt: 32, $gt: 23 } },
+      distanceField: 'distance',
+    },
+  },
   { $limit: 10 },
 ]);
