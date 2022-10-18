@@ -201,7 +201,7 @@ db.persons
     {
       $bucketAuto: {
         groupBy: '$dob.age',
-        $buckets: 5,
+        buckets: 5,
         output: {
           persons: { $sum: 1 },
           averageage: { $avg: '$dob.age' },
