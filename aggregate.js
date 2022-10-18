@@ -192,3 +192,21 @@ db.persons.aggregate([
     },
   },
 ]);
+
+/*
+Mongo looks at the data and draws up the boundaries based on the number of buckets specified
+*/
+db.persons
+  .aggregate([
+    {
+      $bucketAuto: {
+        groupBy: '$dob.age',
+        $buckets: 5,
+        output: {
+          persons: { $sum: 1 },
+          averageage: { $avg: '$dob.age' },
+        },
+      },
+    },
+  ])
+  .pretty();
